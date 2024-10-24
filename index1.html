@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .instructions {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .feedback {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="title">Accounting Game</h1>
+        
+        <div class="form-group">
+            <label for="name">Ad:</label>
+            <input type="text" id="name" placeholder="Adınızı girin">
+        </div>
+
+        <div class="form-group">
+            <label for="surname">Soyad:</label>
+            <input type="text" id="surname" placeholder="Soyadınızı girin">
+        </div>
+
+        <button onclick="startGame()">Oyuna Başla</button>
+
+        <div class="instructions" id="question" style="display:none;">
+            <p>Şirket, ofis mobilyaları için 10.000 TL nakit ödeme yaptı. Bu işlemi doğru hesaplara kaydedin.</p>
+        </div>
+
+        <div class="form-group" style="display:none;" id="debitInput">
+            <label for="debit">Borç Hesabı:</label>
+            <input type="text" id="debit" placeholder="Hesap Adı">
+        </div>
+
+        <div class="form-group" style="display:none;" id="creditInput">
+            <label for="credit">Alacak Hesabı:</label>
+            <input type="text" id="credit" placeholder="Hesap Adı">
+        </div>
+
+        <button id="submitAnswer" onclick="checkAnswer()" style="display:none;">Kaydet</button>
+
+        <div id="result" class="result"></div>
+        <div id="score" class="result"></div>
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        let score = 0;
+        let playerName = "";
+        let playerSurname = "";
+        let incorrectQuestions = [];
+
+        const questions = [
+            {
+                question: "Şirket, ofis mobilyaları için 10.000 TL nakit ödeme yaptı.",
+                debit: "demirbaşlar",
+                credit: "kasa"
+            },
+            {
+                question: "Şirket, 8.000 TL tutarında satış yaptı ve bedelini nakit olarak tahsil etti.",
+                debit: "kasa",
+                credit: "yurt içi satışlar"
+            },
+            {
+                question: "Şirket, stoklara eklemek üzere 20.000 TL tutarında mal satın aldı.",
+                debit: "stoklar",
+                credit: "kasa"
+            },
+            {
+                question: "Şirket, makineler için 100.000 TL'lik bir kredi aldı.",
+                debit: "makineler",
+                credit: "banka kredileri"
+            }
+        ];
+
+        function startGame() {
+            playerName = document.getElementById('name').value;
+            playerSurname = document.getElementById('surname').value;
+            
+            if (playerName && playerSurname) {
+                document.getElementById('question').style.display = 'block';
+                document.getElementById('debitInput').style.display = 'block';
+                document.getElementById('creditInput').style.display = 'block';
+                document.getElementById('submitAnswer').style.display = 'block';
+                document.getElementById('result').innerHTML = `<p>Hoşgeldiniz, ${playerName} ${playerSurname}. Başarılar dileriz!</p>`;
+                document.getElementById('name').style.display = 'none';
+                document.getElementById('surname').style.display = 'none';
+                document.querySelector("button").style.display = 'none';
+            } else {
+                document.getElementById('result').innerHTML = `<span class='error'>Lütfen adınızı ve soyadınızı giriniz.</span>`;
+            }
+        }
+
+        function checkAnswer() {
+            const debit = document.getElementById('debit').value.toLowerCase();
+            const credit = document.getElementById('credit').value.toLowerCase();
+            const result = document.getElementById('result');
+
+            if (debit === questions[currentQuestion].debit && credit === questions[currentQuestion].credit) {
+                score += 10;
+                result.innerHTML = "<span class='success'>Doğru! İşlem kaydedildi.</span>";
+                document.getElementById('score').innerHTML = `<p>Puanınız: ${score}</p>`;
+            } else {
+                result.innerHTML = "<span class='error'>Yanlış hesaplar! Lütfen tekrar deneyin.</span>";
+                incorrectQuestions.push(questions[currentQuestion].question); // Yanlış yapılan soruları kaydediyoruz
+            }
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                document.getElementById('question').innerHTML = `<p>${questions[currentQuestion].question}</p>`;
+                document.getElementById('debit').value = '';
+                document.getElementById('credit').value = '';
+                document.getElementById('result').innerHTML = '';
+            } else {
+                document.getElementById('question').innerHTML = "<p>Tüm soruları tamamladınız!</p>";
+                document.getElementById('debit').style.display = "none";
+                document.getElementById('credit').style.display = "none";
+                document.getElementById('submitAnswer').style.display = "none";
+                document.getElementById('result').innerHTML = `<p>Tebrikler, ${playerName} ${playerSurname}! Tüm soruları tamamladınız. Toplam Puanınız: ${score}</p>`;
+
+                // Geri bildirim ve eksik konular
+                if (incorrectQuestions.length > 0) {
+                    let feedbackMessage = "<p>Eksik olduğunuz konular:</p><ul>";
+                    incorrectQuestions.forEach((q) => {
+                        feedbackMessage += `<li>${q}</li>`;
+                    });
+                    feedbackMessage += "</ul><p>Bu konular üzerinde çalışmanız önerilir.</p>";
+                    document.getElementById('feedback').innerHTML = feedbackMessage;
+                } else {
+                    document.getElementById('feedback').innerHTML = "<p>Tebrikler! Tüm soruları doğru cevapladınız.</p>";
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
